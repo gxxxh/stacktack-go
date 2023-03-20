@@ -1,4 +1,4 @@
-module stacktack-go
+module github.com/gxxxh/stacktack-go
 
 go 1.19
 
