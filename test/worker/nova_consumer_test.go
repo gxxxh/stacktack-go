@@ -16,7 +16,7 @@ func TestNovaConsumerRun(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	novaConsumer.Run(worker.NovaNotificationInfoHandler)
+	novaConsumer.Run()
 
 }
 
@@ -28,7 +28,7 @@ func TestNovaConsumerShutDown(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	go novaConsumer.Run(worker.NovaNotificationInfoHandler)
+	go novaConsumer.Run()
 	time.Sleep(10 * time.Second) //make sure shutdown should be called after Run
 	novaConsumer.Shutdown(novaConsumer.ConsumerTag)
 }

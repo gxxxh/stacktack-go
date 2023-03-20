@@ -20,9 +20,10 @@ func init() {
 }
 
 type Consumer struct {
-	conn    *amqp.Connection
-	channel *amqp.Channel
-	done    chan error //关闭标志
+	conn       *amqp.Connection
+	channel    *amqp.Channel
+	done       chan error //关闭标志
+	Deliveries <-chan amqp.Delivery
 }
 
 func NewConsumer(rabbitMQConnectConfig *RabbitMQConnectConfig) (*Consumer, error) {
@@ -46,6 +47,11 @@ func NewConsumer(rabbitMQConnectConfig *RabbitMQConnectConfig) (*Consumer, error
 	if err != nil {
 		return nil, fmt.Errorf("Channel: %s", err)
 	}
+
+	//连接被动关闭时运行
+	go func() {
+		Log.Printf("closing: %s", <-c.conn.NotifyClose(make(chan *amqp.Error)))
+	}()
 	return c, nil
 }
 
@@ -101,6 +107,24 @@ func (c *Consumer) Bind(exchangeConfig *ExchnageConfig, queueConfig *QueueConfig
 		queueConfig.Args,        // arguments
 	); err != nil {
 		return fmt.Errorf("Queue Bind: %s", err)
+	}
+	return nil
+}
+func (c *Consumer) StartConsume(exchangeConfig *ExchnageConfig, queueConfig *QueueConfig, consumerTag string) error {
+	var err error
+	Log.Printf("starting Consume (consumer tag %s ) Exhange %s on queue %s", consumerTag, exchangeConfig.Exchange, queueConfig.QueueName)
+
+	c.Deliveries, err = c.channel.Consume(
+		queueConfig.QueueName, // name
+		consumerTag,           // consumerTag,
+		false,                 // autoAck
+		false,                 // exclusive
+		false,                 // noLocal
+		false,                 // noWait
+		nil,                   // arguments
+	)
+	if err != nil {
+		return fmt.Errorf("Queue Consume: %s", err)
 	}
 	return nil
 }
