@@ -2,8 +2,8 @@ package worker
 
 import (
 	"fmt"
+	"github.com/gxxxh/stacktack-go/src/worker"
 	"github.com/tidwall/gjson"
-	"stacktack-go/src/worker"
 	"testing"
 	"time"
 )
