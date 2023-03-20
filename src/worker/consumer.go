@@ -143,5 +143,14 @@ func (c *Consumer) Shutdown(consumerTag string) error {
 	defer Log.Printf("AMQP shutdown OK")
 
 	// wait for handle() to exit
+	return c.WaitingForCleanUp()
+}
+
+func (c *Consumer) CleanUp() {
+	Log.Printf("handle: deliveries channel closed")
+	c.done <- nil
+}
+
+func (c *Consumer) WaitingForCleanUp() error {
 	return <-c.done
 }
